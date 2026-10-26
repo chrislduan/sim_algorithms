@@ -13,9 +13,12 @@ class GameBoard:
         Use `Color.NONE` for edges that do not exist, and `Color.UNCOLORED` for the other edges.
         """
         # create board of Uncolored Edges
-        self.board = [[Color.UNCOLORED for _ in range(6)] for _ in range(6)]
+        self.board = Board
+        for row in range(NUM_NODES):
+            for col in range(NUM_NODES):
+                self.board[row][col] = Color.UNCOLORED
         # traverse across diagonal to label edges None
-        for diag in range(6):
+        for diag in range(NUM_NODES):
             self.board[diag][diag] = Color.NONE
 
 
@@ -84,7 +87,7 @@ class GameBoard:
             return Color.P1
         return None
 
-        # raise NotImplementedError
+
 
     def __str__(self):
         """

@@ -36,14 +36,14 @@ class GameBoard:
         node_set = set()
         # set of edges
         edge_set = set()
-        for row in len(self.board):
-            for col in len(self.board[row]):
+        for row in range(len(self.board)):
+            for col in range(len(self.board[row])):
                 edge = self.board[row][col]
                 # add edge to player's set of nodes if it matches player
                 if edge == player_color:
-                    node_set.add(edge[0])
-                    node_set.add(edge[1])
-                    edge_set.add(edge)
+                    node_set.add(row)
+                    node_set.add(col)
+                    edge_set.add((row, col))
 
         # if number of nodes, there cannot be any triangles
         if len(node_set) < 3:
@@ -52,12 +52,13 @@ class GameBoard:
         # get triangle combinations to check, list of 3-edge lists
         # using our list of nodes
         triangle_combos = []
-        for i in range(0 , len(node_set) - 2):
-            for j in range(i + 1, len(node_set) - 1):
-                for k in range(j + 1, len(node_set)):
-                    edge_1 = (node_set[i], node_set[j])
-                    edge_2 = (node_set[j], node_set[k])
-                    edge_3 = (node_set[k], node_set[i])
+        node_list = list(node_set)
+        for i in range(0 , len(node_list) - 2):
+            for j in range(i + 1, len(node_list) - 1):
+                for k in range(j + 1, len(node_list)):
+                    edge_1 = (node_list[i], node_list[j])
+                    edge_2 = (node_list[j], node_list[k])
+                    edge_3 = (node_list[k], node_list[i])
 
                     triangle_combos.append([edge_1, edge_2, edge_3])
 

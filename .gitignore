@@ -1,2 +1,7 @@
 *.xml
 *.iml
+__pycache__/consts.cpython-314.pyc
+__pycache__/__init__.cpython-314.pyc
+__pycache__/sim_board.cpython-314.pyc
+tests/__pycache__/__init__.cpython-314.pyc
+tests/__pycache__/test_board.cpython-314-pytest-9.1.1.pyc

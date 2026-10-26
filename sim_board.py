@@ -23,7 +23,12 @@ class GameBoard:
         """
         Update `board` to reflect coloring the given edge.
         """
-        raise NotImplementedError
+        point_1 = edge[0]
+        point_2 = edge[1]
+        self.board[point_1][point_2] = color
+        self.board[point_2][point_1] = color
+
+    
 
     def get_winner(self) -> Color | None:
         """

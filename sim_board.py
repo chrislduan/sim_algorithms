@@ -28,7 +28,7 @@ class GameBoard:
         self.board[point_1][point_2] = color
         self.board[point_2][point_1] = color
 
-    def find_triangle(self, player_color: Color):
+    def find_triangle(self, player_color: Color) -> bool:
         """
         Given a Player color, search for the list for triangles
         """
@@ -75,6 +75,14 @@ class GameBoard:
         Return the color of the player that has won (Color.P1 or Color.P2).
         If the game is still in progress (no one has won yet), return None.
         """
+        # if we find triangle for P1, then P2 wins
+        if self.find_triangle(Color.P1):
+            return Color.P2
+        # if we find triangle for P2, then P1 wins
+        if self.find_triangle(Color.P2):
+            return Color.P1
+        return None
+
         # raise NotImplementedError
 
     def __str__(self):

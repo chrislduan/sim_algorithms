@@ -13,10 +13,7 @@ class GameBoard:
         Use `Color.NONE` for edges that do not exist, and `Color.UNCOLORED` for the other edges.
         """
         # create board of Uncolored Edges
-        self.board = Board
-        for row in range(NUM_NODES):
-            for col in range(NUM_NODES):
-                self.board[row][col] = Color.UNCOLORED
+        self.board = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
         # traverse across diagonal to label edges None
         for diag in range(NUM_NODES):
             self.board[diag][diag] = Color.NONE

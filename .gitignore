@@ -5,3 +5,6 @@ __pycache__/__init__.cpython-314.pyc
 __pycache__/sim_board.cpython-314.pyc
 tests/__pycache__/__init__.cpython-314.pyc
 tests/__pycache__/test_board.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/test_helpers.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/test_player2.cpython-314-pytest-9.1.1.pyc
+__pycache__/player2.cpython-314.pyc

@@ -12,7 +12,12 @@ class GameBoard:
         Initialize `board` as the adjacency matrix for the starting board.
         Use `Color.NONE` for edges that do not exist, and `Color.UNCOLORED` for the other edges.
         """
-        raise NotImplementedError
+        # create board of Uncolored Edges
+        self.board = [[Color.UNCOLORED for _ in range(6)] for _ in range(6)]
+        # traverse across diagonal to label edges None
+        for diag in range(6):
+            self.board[diag][diag] = Color.NONE
+
 
     def color_edge(self, edge: Edge, color: Color) -> None:
         """

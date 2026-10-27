@@ -37,13 +37,24 @@ class Player2:
                         colored_nodes.append(j)
 
         # get list of possible nodes to add to the board (dictionary of lists, keyed on nodes)
-        node_uncolored_edge_count = dict()
+        # by finding the nodes without any colored edges
+        node_uncolored_edge_count = {
+            0: [],
+            1: [],
+            2: [],
+            3: [],
+            4: [],
+            5: []
+        }
         for i in range(len(board)):
             for j in range(len(board[i])):
-                if board[i][j] == Color.NONE:
-                    if i not in node_uncolored_edge_count:
-                        node_uncolored_edge_count[i] = [j]
-                    else:
+                # check through edges marked none that are not diagonals
+                if board[i][j] == Color.NONE and i != j:
+                    # correct board such that any node with colored edges will have uncolored edges as well
+                    if i in colored_nodes and j in colored_nodes:
+                        colored_board[i][j] = Color.UNCOLORED
+                    # add to non_colored_edge count if the node is not part of the colored set
+                    if i not in colored_nodes:
                         node_uncolored_edge_count[i].append(j)
 
         # go through every node

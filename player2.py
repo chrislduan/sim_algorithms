@@ -20,7 +20,46 @@ class Player2:
         """
         Return a miniboard from the input board state. If there are multiple miniboards, this method can return any of them.
         """
-        raise NotImplementedError
+        colored_board = board
+
+        # remove all non-colored edges on the board
+        for i in range(len(board)):
+            for j in range(len(board[i])):
+                if board[i][j] == Color.UNCOLORED:
+                    colored_board[i][j] = Color.NONE
+
+        # get list of possible nodes to add to the board (dictionary of lists, keyed on nodes)
+        node_uncolored_edge_count = dict()
+        for i in range(len(board)):
+            for j in range(len(board[i])):
+                if board[i][j] == Color.NONE:
+                    if i not in node_uncolored_edge_count:
+                        node_uncolored_edge_count[i] = [j]
+                    else:
+                        node_uncolored_edge_count[i].append(j)
+
+        # go through every node
+        for node in node_uncolored_edge_count:
+            # if all edges are colored, skip
+            if len(node_uncolored_edge_count[node]) == 0:
+                continue
+            # create a miniboard including all colored edges and uncolored edges linking to current node
+            miniboard = colored_board
+            # mark all edges connected to node as uncolored
+            for i in range(NUM_NODES):
+                # set all edges related to node as uncolored except for diagonal
+                if miniboard[node][i] == Color.NONE and node != i:
+                    # color node in both directions
+                    miniboard[node][i] = Color.UNCOLORED
+                    miniboard[i][node] = Color.UNCOLORED
+
+            # check if there is at least one allowed move for P2 on this board
+            allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
+
+            if len(allowed_moves) > 1:
+                return miniboard
+
+        return None
 
     @staticmethod
     def get_maximal_allowed_sets(player: Color, board: Board) -> set[frozenset[Edge]]:
@@ -47,6 +86,7 @@ class Player2:
                 elif board[row][col] == player:
                     player_edges.append((row, col))
 
+        # create list of allowed moves by going through every uncolored edge
         allowed_moves = []
         for edge in uncolored_edges:
             p1, p2 = edge
@@ -58,6 +98,7 @@ class Player2:
                 if p3 == p1 or p3 == p2:
                     continue
 
+                # get ordered pair edges that could possibly make a triangle
                 edge_1 = (min(p1, p3), max(p1, p3))
                 edge_2 = (min(p2, p3), max(p2, p3))
 

@@ -81,12 +81,52 @@ class Player2:
         return None
 
     @staticmethod
+    def get_power_set(move_set: list):
+        """
+        Using recursion to get power set of move list
+        """
+        # define base case, returning set with emtpy set if set is not a list
+        if not move_set:
+            return [[]]
+
+        # recursively get the smaller power sets by using given set with last item removed
+        collected_sets = Player2.get_power_set(move_set[:-1])
+
+        # retrieve last item
+        last_item = move_set[-1]
+
+        # loop through each item in subset to get all possible lists with last_item
+        power_set = []
+        for subset in collected_sets:
+            power_set.append(subset + [last_item])
+
+        return collected_sets + power_set
+
+    @staticmethod
     def get_maximal_allowed_sets(player: Color, board: Board) -> set[frozenset[Edge]]:
         """
         Return a set of all distinct maximal allowed sets for the given player over the input board state.
         If player is Color.P1, find all maximal p1-allowed sets; if player is Color.P2, find all maximal p2-allowed sets.
         """
-        raise NotImplementedError
+        allowed_moves = Player2.get_allowed_moves(player, board)
+
+        # get every possible combination of allowed_moves by getting the power set
+        moves_power_set = Player2.get_power_set(allowed_moves)
+        # sort power set by size of each set in it, largest set first
+        moves_power_set.sort(key=len, reverse = True)
+
+        # get every possible set of allowed_moves that doesn't make triangle in given board
+        maximal_set = []
+        for move_set in moves_power_set:
+            # if size of current set is smaller than our maximal set, skip check
+            if len(move_set) < len(maximal_set):
+                continue
+
+            # loop through every edge in move_set, and create a demo board
+            demo_board = board
+
+
+        return maximal_set
 
     @staticmethod
     def get_allowed_moves(player: Color, board: Board) -> list[Edge]:

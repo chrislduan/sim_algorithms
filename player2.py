@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Any
+
 from consts import Board, Color, Edge, NUM_NODES
 
 
@@ -13,7 +16,38 @@ class Player2:
         Return a possible move for the second player (blue) that follows the optimal strategy laid out in the handout,
         given the input board state. If multiple moves are viable, this method can return any of them.
         """
-        raise NotImplementedError
+        # get miniboard
+        miniboard = Player2.get_miniboard(board)
+
+        # get allowed moves
+        allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
+
+        # if only on allowed_move, choose that move
+        if len(allowed_moves) == 1:
+            return allowed_moves[0]
+
+        # get maximal allowed set for p2
+        p2_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P2, miniboard)
+
+        # if only one move within p2 maximal allowed set, return it
+        if len(p2_maximal_allowed_sets) == 1 and len(p2_maximal_allowed_sets[0]):
+            return allowed_moves[0]
+
+        # get maximal allowed set for p1
+        p1_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard)
+
+        # find move that appears in most maximal_allowed_set
+        move_count: dict[Edge, int] = dict()
+        for move_set in p1_maximal_allowed_sets:
+            for move in move_set:
+                if move not in move_set:
+                    move_count[move] = 1
+                else:
+                    move_count[move] += 1
+
+        # get the maximum count within move_count
+        next_move = max(move_count, key=move_count.get)
+        return next_move
 
     @staticmethod
     def get_miniboard(board: Board) -> Board | None:
@@ -125,6 +159,7 @@ class Player2:
             # loop through every edge in move_set, and create a demo board
             demo_board = board
 
+        # implement possibly using a dfs
 
         return maximal_set
 

@@ -15,7 +15,7 @@ def test_miniboard_starter() -> None:
     miniboard = Player2.get_miniboard(board.board)
     assert (
         miniboard == expected_miniboard_1.board
-        or miniboard == expected_miniboard_2.board
+        # or miniboard == expected_miniboard_2.board
     )
 
 

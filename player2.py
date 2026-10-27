@@ -22,11 +22,19 @@ class Player2:
         """
         colored_board = board
 
-        # remove all non-colored edges on the board
+        # list of colored nodes
+        colored_nodes = []
+
+        # remove all non-colored edges on the board and get list of colored nodes
         for i in range(len(board)):
             for j in range(len(board[i])):
                 if board[i][j] == Color.UNCOLORED:
                     colored_board[i][j] = Color.NONE
+                if board[i][j] == Color.P1 or board[i][j] == Color.P2:
+                    if i not in colored_nodes:
+                        colored_nodes.append(i)
+                    if j not in colored_nodes:
+                        colored_nodes.append(j)
 
         # get list of possible nodes to add to the board (dictionary of lists, keyed on nodes)
         node_uncolored_edge_count = dict()
@@ -47,8 +55,8 @@ class Player2:
             miniboard = colored_board
             # mark all edges connected to node as uncolored
             for i in range(NUM_NODES):
-                # set all edges related to node as uncolored except for diagonal
-                if miniboard[node][i] == Color.NONE and node != i:
+                # set all edges related to node and a colored node as uncolored except for diagonal
+                if i in colored_nodes and miniboard[node][i] == Color.NONE and node != i:
                     # color node in both directions
                     miniboard[node][i] = Color.UNCOLORED
                     miniboard[i][node] = Color.UNCOLORED

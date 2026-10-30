@@ -145,21 +145,80 @@ class Player2:
         allowed_moves = Player2.get_allowed_moves(player, board)
 
         # get every possible combination of allowed_moves by getting the power set
-        moves_power_set = Player2.get_power_set(allowed_moves)
-        # sort power set by size of each set in it, largest set first
-        moves_power_set.sort(key=len, reverse = True)
+        # moves_power_set = Player2.get_power_set(allowed_moves)
+        # # sort power set by size of each set in it, largest set first
+        # moves_power_set.sort(key=len, reverse = True)
+        #
+        # # get every possible set of allowed_moves that doesn't make triangle in given board
+        # maximal_set = []
+        # for move_set in moves_power_set:
+        #     # if size of current set is smaller than our maximal set, skip check
+        #     if len(move_set) < len(maximal_set):
+        #         continue
+        #
+        #     # loop through every edge in move_set, and create a demo board
+        #     demo_board = board
 
-        # get every possible set of allowed_moves that doesn't make triangle in given board
+        def has_triangle(player: Color, miniboard: Board):
+            player_edges = []
+            for row in range(len(board)):
+                for col in range(row, len(board[row])):
+                    if miniboard[row][col] == player:
+                        player_edges.append((row, col))
+            for edge in player_edges:
+                p1, p2 = edge
+                for p3 in range(NUM_NODES):
+                    if p3 == p1 or p3 == p2:
+                        continue
+
+                    # get ordered pair edges that could possibly make a triangle
+                    edge_1 = (min(p1, p3), max(p1, p3))
+                    edge_2 = (min(p2, p3), max(p2, p3))
+
+                    if edge_1 in player_edges and edge_2 in player_edges:
+                        return True
+            return False
+
+        # implement using a dfs
         maximal_set = []
-        for move_set in moves_power_set:
-            # if size of current set is smaller than our maximal set, skip check
-            if len(move_set) < len(maximal_set):
-                continue
+        largest_set_length = 0
 
-            # loop through every edge in move_set, and create a demo board
-            demo_board = board
+        # helper function to go over moves
+        def move_dfs(move_set, board: Board):
+            visited_edges.append(move_set[0])
+            move_list = []
+            for move in move_set:
+                p1, p2 = move
+                move_board = board
+                move_board[p1][p2] = player
+                move_board[p2][p1] = player
+                forms_triangle = has_triangle(player, move_board)
+                if not forms_triangle:
+                    move_list.extend(move_dfs(move_set[1:], move_board))
+                    move_list.append(move)
+                if forms_triangle:
+                    if len(visited_edges) > 0:
+                        visited_edges.pop()
+                    return []
+                if len(visited_edges) > 0:
+                    visited_edges.pop()
+            return move_list
 
-        # implement possibly using a dfs
+        # for move in allowed_moves:
+        #     move_stack = [move]
+
+        # do a depth first search for each move set to see if it makes a triangle
+        while len(allowed_moves) > 0:
+            visited_edges = []
+            current_move_set = move_dfs(allowed_moves, board)
+            if len(current_move_set) > 0:
+                if len(current_move_set) == largest_set_length:
+                    maximal_set.append(current_move_set)
+                elif len(current_move_set) > largest_set_length:
+                    maximal_set = [current_move_set]
+                    largest_set_length = len(current_move_set)
+            allowed_moves.pop(0)
+
 
         return maximal_set
 
@@ -187,7 +246,7 @@ class Player2:
             triangle = False
 
             # loops through available points, checking if they make a triangle
-            for p3 in range(6):
+            for p3 in range(NUM_NODES):
                 # skip if we are already using that point
                 if p3 == p1 or p3 == p2:
                     continue

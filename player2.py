@@ -41,16 +41,20 @@ class Player2:
         p1_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard)
 
         # find move that appears in most maximal_allowed_set
-        move_count: dict[Edge, int] = dict()
+        p1_move_count: dict[Edge, int] = dict()
         for move_set in p1_maximal_allowed_sets:
             for move in move_set:
-                if move not in move_count:
-                    move_count[move] = 1
+                if move not in p1_move_count:
+                    p1_move_count[move] = 1
                 else:
-                    move_count[move] += 1
+                    p1_move_count[move] += 1
+
+        # case when player 1 has already lost, thus has no allowed
+        if not p1_move_count:
+            return next(iter(p2_maximal_allowed_sets[0]))
 
         # get the maximum count within move_count
-        next_move = max(move_count, key=move_count.get)
+        next_move = max(p1_move_count, key=p1_move_count.get)
         return next_move
 
     @staticmethod

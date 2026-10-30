@@ -30,8 +30,8 @@ class Player2:
         p2_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P2, miniboard)
 
         # if only one move within p2 maximal allowed set, return it
-        if len(p2_maximal_allowed_sets) == 1 and len(p2_maximal_allowed_sets[0]):
-            return allowed_moves[0]
+        if len(p2_maximal_allowed_sets) == 1 and len(p2_maximal_allowed_sets[0]) == 1:
+            return next(iter(p2_maximal_allowed_sets[0]))
 
         # get maximal allowed set for p1
         p1_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard)
@@ -40,7 +40,7 @@ class Player2:
         move_count: dict[Edge, int] = dict()
         for move_set in p1_maximal_allowed_sets:
             for move in move_set:
-                if move not in move_set:
+                if move not in move_count:
                     move_count[move] = 1
                 else:
                     move_count[move] += 1
@@ -113,6 +113,8 @@ class Player2:
                 return miniboard
 
         return None
+
+
 
 
     @staticmethod

@@ -144,21 +144,6 @@ class Player2:
         """
         allowed_moves = Player2.get_allowed_moves(player, board)
 
-        # get every possible combination of allowed_moves by getting the power set
-        # moves_power_set = Player2.get_power_set(allowed_moves)
-        # # sort power set by size of each set in it, largest set first
-        # moves_power_set.sort(key=len, reverse = True)
-        #
-        # # get every possible set of allowed_moves that doesn't make triangle in given board
-        # maximal_set = []
-        # for move_set in moves_power_set:
-        #     # if size of current set is smaller than our maximal set, skip check
-        #     if len(move_set) < len(maximal_set):
-        #         continue
-        #
-        #     # loop through every edge in move_set, and create a demo board
-        #     demo_board = board
-
         def has_triangle(player: Color, miniboard: Board):
             player_edges = []
             for row in range(len(board)):
@@ -179,48 +164,71 @@ class Player2:
                         return True
             return False
 
+        def copy_board(original: Board) -> Board:
+            copied_board = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
+            for row in range(NUM_NODES):
+                for col in range(NUM_NODES):
+                    copied_board[row][col] = original[row][col]
+            return copied_board
+
         # implement using a dfs
-        maximal_set = []
+        maximal_sets = []
         largest_set_length = 0
+        current_move_set = []
 
         # helper function to go over moves
         def move_dfs(move_set, board: Board):
-            visited_edges.append(move_set[0])
-            move_list = []
-            for move in move_set:
-                p1, p2 = move
-                move_board = board
-                move_board[p1][p2] = player
-                move_board[p2][p1] = player
-                forms_triangle = has_triangle(player, move_board)
-                if not forms_triangle:
-                    move_list.extend(move_dfs(move_set[1:], move_board))
-                    move_list.append(move)
-                if forms_triangle:
-                    if len(visited_edges) > 0:
-                        visited_edges.pop()
-                    return []
-                if len(visited_edges) > 0:
-                    visited_edges.pop()
-            return move_list
+            nonlocal maximal_sets, largest_set_length, current_move_set
+            # visited_edges.append(move_set[0])
+            # move_list = []
+            copied_move_set = move_set.copy()
+            move = copied_move_set[0]
+            p1, p2 = move
+            move_board = copy_board(board)
+            move_board[p1][p2] = player
+            move_board[p2][p1] = player
+            forms_triangle = has_triangle(player, move_board)
+            if forms_triangle:
+                return
+            if not forms_triangle:
+                current_move_set.append(move)
+                if len(current_move_set) == largest_set_length:
+                    maximal_sets.append(current_move_set)
+                if len(current_move_set) > largest_set_length:
+                    maximal_sets = [current_move_set.copy()]
+                    largest_set_length = len(current_move_set)
+                copied_move_set.pop(0)
+                while len(copied_move_set) > 0:
+                    move_dfs(copied_move_set, move_board)
+                    copied_move_set.pop(0)
+                if len(current_move_set) > 0:
+                    current_move_set.pop()
+
+
+        while len(allowed_moves) > 0:
+            move_dfs(allowed_moves, board)
+            current_move_set = []
+            allowed_moves.pop(0)
 
         # for move in allowed_moves:
         #     move_stack = [move]
 
-        # do a depth first search for each move set to see if it makes a triangle
-        while len(allowed_moves) > 0:
-            visited_edges = []
-            current_move_set = move_dfs(allowed_moves, board)
-            if len(current_move_set) > 0:
-                if len(current_move_set) == largest_set_length:
-                    maximal_set.append(current_move_set)
-                elif len(current_move_set) > largest_set_length:
-                    maximal_set = [current_move_set]
-                    largest_set_length = len(current_move_set)
-            allowed_moves.pop(0)
+        # # do a depth first search for each move set to see if it makes a triangle
+        # while len(allowed_moves) > 0:
+        #     visited_edges = []
+        #     current_move_set = move_dfs(allowed_moves, board)
+        #     if len(current_move_set) > 0:
+        #         if len(current_move_set) == largest_set_length:
+        #             maximal_set.append(current_move_set)
+        #         elif len(current_move_set) > largest_set_length:
+        #             maximal_set = [current_move_set]
+        #             largest_set_length = len(current_move_set)
+        #     allowed_moves.pop(0)
 
-
-        return maximal_set
+        final_sets = []
+        for moveset in maximal_sets:
+            final_sets.append(frozenset(moveset))
+        return final_sets
 
     @staticmethod
     def get_allowed_moves(player: Color, board: Board) -> list[Edge]:

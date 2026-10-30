@@ -80,8 +80,8 @@ class Player2:
             4: [],
             5: []
         }
-        for i in range(len(board)):
-            for j in range(len(board[i])):
+        for i in range(NUM_NODES):
+            for j in range(NUM_NODES):
                 # check through edges marked none that are not diagonals
                 if board[i][j] == Color.NONE and i != j:
                     # correct board such that any node with colored edges will have uncolored edges as well
@@ -114,27 +114,6 @@ class Player2:
 
         return None
 
-    @staticmethod
-    def get_power_set(move_set: list):
-        """
-        Using recursion to get power set of move list
-        """
-        # define base case, returning set with emtpy set if set is not a list
-        if not move_set:
-            return [[]]
-
-        # recursively get the smaller power sets by using given set with last item removed
-        collected_sets = Player2.get_power_set(move_set[:-1])
-
-        # retrieve last item
-        last_item = move_set[-1]
-
-        # loop through each item in subset to get all possible lists with last_item
-        power_set = []
-        for subset in collected_sets:
-            power_set.append(subset + [last_item])
-
-        return collected_sets + power_set
 
     @staticmethod
     def get_maximal_allowed_sets(player: Color, board: Board) -> set[frozenset[Edge]]:

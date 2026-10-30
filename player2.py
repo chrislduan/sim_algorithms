@@ -142,16 +142,22 @@ class Player2:
         Return a set of all distinct maximal allowed sets for the given player over the input board state.
         If player is Color.P1, find all maximal p1-allowed sets; if player is Color.P2, find all maximal p2-allowed sets.
         """
+        # first get allowed moves on a board
         allowed_moves = Player2.get_allowed_moves(player, board)
 
+        # helper function to check if a miniboard has triangle
         def has_triangle(player: Color, miniboard: Board):
+            # make list of player edges
             player_edges = []
-            for row in range(len(board)):
-                for col in range(row, len(board[row])):
+            for row in range(NUM_NODES):
+                for col in range(row, NUM_NODES):
                     if miniboard[row][col] == player:
                         player_edges.append((row, col))
+
+            # grab each edge
             for edge in player_edges:
                 p1, p2 = edge
+                # check each point not connected to the edge and simulate the triangle it makes
                 for p3 in range(NUM_NODES):
                     if p3 == p1 or p3 == p2:
                         continue
@@ -160,10 +166,12 @@ class Player2:
                     edge_1 = (min(p1, p3), max(p1, p3))
                     edge_2 = (min(p2, p3), max(p2, p3))
 
+                    # check if all edges of simulated triangle belong to player
                     if edge_1 in player_edges and edge_2 in player_edges:
                         return True
             return False
 
+        # helper function to create copy of a given board
         def copy_board(original: Board) -> Board:
             copied_board = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
             for row in range(NUM_NODES):
@@ -171,64 +179,68 @@ class Player2:
                     copied_board[row][col] = original[row][col]
             return copied_board
 
-        # implement using a dfs
+        # implement using a dfs, variables to track maximal set
         maximal_sets = []
         largest_set_length = 0
-        current_move_set = []
+        allowed_move_stack = []
 
-        # helper function to go over moves
+        # helper function to do a depth first search of moves
         def move_dfs(move_set, board: Board):
-            nonlocal maximal_sets, largest_set_length, current_move_set
-            # visited_edges.append(move_set[0])
-            # move_list = []
+            nonlocal maximal_sets, largest_set_length, allowed_move_stack
+
+            # copy the given move set
             copied_move_set = move_set.copy()
+
+            # create a temporary board with the first move set
             move = copied_move_set[0]
             p1, p2 = move
             move_board = copy_board(board)
             move_board[p1][p2] = player
             move_board[p2][p1] = player
+
+            # check if the temporary board with move forms a triangle
             forms_triangle = has_triangle(player, move_board)
+
+            # if a triangle is formed with current move, step out
             if forms_triangle:
                 return
+
+            #  continue if move is allowed
             if not forms_triangle:
-                current_move_set.append(move)
-                if len(current_move_set) == largest_set_length:
-                    maximal_sets.append(current_move_set)
-                if len(current_move_set) > largest_set_length:
-                    maximal_sets = [current_move_set.copy()]
-                    largest_set_length = len(current_move_set)
+                # if the move doesn't create triangle with allowed moves so far, add it to our set
+                allowed_move_stack.append(move)
+
+                # check if our current stack matches or exceeds length of maximal set
+                # add or change list of maximal sets accordingly
+                if len(allowed_move_stack) == largest_set_length:
+                    maximal_sets.append(allowed_move_stack)
+                if len(allowed_move_stack) > largest_set_length:
+                    maximal_sets = [allowed_move_stack.copy()]
+                    largest_set_length = len(allowed_move_stack)
+
+                # remove current move and progress deeper in combination
                 copied_move_set.pop(0)
                 while len(copied_move_set) > 0:
                     move_dfs(copied_move_set, move_board)
                     copied_move_set.pop(0)
-                if len(current_move_set) > 0:
-                    current_move_set.pop()
 
+                # pop stack as we try different allowed move combinations
+                if len(allowed_move_stack) > 0:
+                    allowed_move_stack.pop()
 
+        # loop through allowed moves, treating it as a queue to get every possible combination
         while len(allowed_moves) > 0:
+            # first call on a recursive depth first search
             move_dfs(allowed_moves, board)
-            current_move_set = []
+            # stack to track sets of allowed moves,reset whenever we go to next part of queue
+            allowed_move_stack = []
             allowed_moves.pop(0)
 
-        # for move in allowed_moves:
-        #     move_stack = [move]
-
-        # # do a depth first search for each move set to see if it makes a triangle
-        # while len(allowed_moves) > 0:
-        #     visited_edges = []
-        #     current_move_set = move_dfs(allowed_moves, board)
-        #     if len(current_move_set) > 0:
-        #         if len(current_move_set) == largest_set_length:
-        #             maximal_set.append(current_move_set)
-        #         elif len(current_move_set) > largest_set_length:
-        #             maximal_set = [current_move_set]
-        #             largest_set_length = len(current_move_set)
-        #     allowed_moves.pop(0)
-
-        final_sets = []
+        # convert maximal_sets into a list of frozen sets
+        result_sets = []
         for moveset in maximal_sets:
-            final_sets.append(frozenset(moveset))
-        return final_sets
+            result_sets.append(frozenset(moveset))
+        return result_sets
 
     @staticmethod
     def get_allowed_moves(player: Color, board: Board) -> list[Edge]:
@@ -267,7 +279,7 @@ class Player2:
                 if edge_1 in player_edges and edge_2 in player_edges:
                     triangle = True
                     break
-
+            # add move to allowed moves if no triangle is formed
             if not triangle:
                 allowed_moves.append(edge)
 

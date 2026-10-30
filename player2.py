@@ -19,6 +19,10 @@ class Player2:
         # get miniboard
         miniboard = Player2.get_miniboard(board)
 
+        # case if miniboard is none, use the whole board
+        if not miniboard:
+            miniboard = board
+
         # get allowed moves
         allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
 

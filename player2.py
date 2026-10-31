@@ -25,7 +25,7 @@ class Player2:
                     copied_board[row][col] = original[row][col]
             return copied_board
 
-        copy_of_board = Player2.copy_board(board)
+        copy_of_board = copy_board(board)
 
 
         # get miniboard

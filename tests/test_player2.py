@@ -41,6 +41,40 @@ def test_maximal_allowed_sets_starter() -> None:
     assert len(actual_sets) == 1
     assert moveset_equal(expected_set, actual_sets.pop())
 
+def test_maximal_allowed_sets_case_1() -> None:
+    # miniboard = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
+
+    # miniboard[(0, 1)] = Color.UNCOLORED
+    # miniboard[(1, 0)] = Color.UNCOLORED
+    # miniboard[(5, 1)] = Color.UNCOLORED
+    # miniboard[(1, 5)] = Color.UNCOLORED
+    #
+    #
+    # miniboard[(0, 5)] = Color.P1
+    # miniboard[(5, 0)] = Color.P2
+
+    red = [(0,5)]
+    miniboard = create_board(red, [])
+
+    miniboard.board[2] = [Color.NONE] * NUM_NODES
+    for y in range(NUM_NODES):
+        miniboard.board[y][2] = Color.NONE
+    miniboard.board[3] = [Color.NONE] * NUM_NODES
+    for y in range(NUM_NODES):
+        miniboard.board[y][3] = Color.NONE
+    miniboard.board[4] = [Color.NONE] * NUM_NODES
+    for y in range(NUM_NODES):
+        miniboard.board[y][4] = Color.NONE
+
+    miniboard.board[1] = [Color.UNCOLORED, Color.NONE, Color.NONE, Color.NONE, Color.NONE, Color.UNCOLORED]
+    miniboard.board[5] = [Color.UNCOLORED, Color.UNCOLORED, Color.NONE, Color.NONE, Color.NONE, Color.NONE]
+
+    expected_set = frozenset([(0, 1), (1, 5)])
+
+    # Act
+    actual_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard.board)
+
+
 
 def test_get_move_starter() -> None:
     red = [(4, 3), (4, 2), (4, 1)]
@@ -63,3 +97,14 @@ def test_get_move_case_1() -> None:
     actual_move = Player2.get_move(board.board)
 
     assert actual_move in [(0,2), (2,0), (2,3), (3,2)]
+
+
+def test_get_move_case_2() -> None:
+    red = [(0,5)]
+    blue = []
+
+    board_1 = create_board(red,blue)
+
+    move_1 = Player2.get_move(board_1.board)
+
+    print(1)

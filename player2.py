@@ -16,12 +16,24 @@ class Player2:
         Return a possible move for the second player (blue) that follows the optimal strategy laid out in the handout,
         given the input board state. If multiple moves are viable, this method can return any of them.
         """
+
+        # helper function to create copy of a given board, prevents pointer issues
+        def copy_board(original: Board) -> Board:
+            copied_board = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
+            for row in range(NUM_NODES):
+                for col in range(NUM_NODES):
+                    copied_board[row][col] = original[row][col]
+            return copied_board
+
+        copy_of_board = Player2.copy_board(board)
+
+
         # get miniboard
-        miniboard = Player2.get_miniboard(board)
+        miniboard = Player2.get_miniboard(copy_of_board)
 
         # case if miniboard is none, use the whole board
         if not miniboard:
-            miniboard = board
+            miniboard = copy_of_board.copy()
 
         # get allowed moves
         allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
@@ -33,20 +45,6 @@ class Player2:
         # get maximal allowed set for p2
         p2_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P2, miniboard)
 
-        # if only one move within p2 maximal allowed set, return it
-        if len(p2_maximal_allowed_sets) == 1:
-            first_move_set = next(iter(p2_maximal_allowed_sets))
-            if len(first_move_set) == 1:
-                first_move = next(iter(first_move_set))
-                return first_move
-
-        # check if move is in p2 maximal allowed sets to simplify nested looping
-        # def move_in_p2_maximal_allowed_sets(move, p2_maximal) -> bool:
-        #     for move_set in p2_maximal:
-        #         for p2_move in move_set:
-        #             if move == p2_move:
-        #                 return True
-        #     return False
 
         # find moves that appear in most p2 maximal sets
         p2_maximal_move_counts = dict()
@@ -64,9 +62,13 @@ class Player2:
 
         # parse through dictionary of move counts and get list of moves that appear in most (best moves)
         p2_best_moves = []
-        for move_key, appearances in p2_maximal_move_counts:
+        for move_key in p2_maximal_move_counts.keys():
+            appearances = p2_maximal_move_counts[move_key]
             if appearances == maximum_appearances:
                 p2_best_moves.append(move_key)
+
+        if len(p2_best_moves) == 1:
+            return p2_best_moves[0]
 
         # get maximal allowed set for p1
         p1_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard)
@@ -81,7 +83,6 @@ class Player2:
         most_p1_move = p1_allowed_moves[0]
         p1_move_count = 0
         for move in p1_allowed_moves:
-            # if move_in_p2_maximal_allowed_sets(move, p2_maximal_allowed_sets):
             # check if p1 move is in the move(s) contained in the greatest number of maximal P2-allowed sets
             if move in p2_best_moves:
                 move_count = 0
@@ -99,7 +100,7 @@ class Player2:
         """
         Return a miniboard from the input board state. If there are multiple miniboards, this method can return any of them.
         """
-        colored_board = board
+        colored_board = board.copy()
 
         # list of colored nodes
         colored_nodes = []
@@ -168,8 +169,19 @@ class Player2:
         Return a set of all distinct maximal allowed sets for the given player over the input board state.
         If player is Color.P1, find all maximal p1-allowed sets; if player is Color.P2, find all maximal p2-allowed sets.
         """
+
+        # helper function to create copy of a given board to start mini board
+        def local_copy_board(original: Board) -> Board:
+            copied_board = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
+            for row in range(NUM_NODES):
+                for col in range(NUM_NODES):
+                    copied_board[row][col] = original[row][col]
+            return copied_board
+
+        copy_of_board = local_copy_board(board)
+
         # first get allowed moves on a board
-        allowed_moves = Player2.get_allowed_moves(player, board)
+        allowed_moves = Player2.get_allowed_moves(player, copy_of_board)
 
         # helper function to check if a miniboard has triangle
         def has_triangle(player: Color, miniboard: Board):
@@ -197,13 +209,7 @@ class Player2:
                         return True
             return False
 
-        # helper function to create copy of a given board
-        def copy_board(original: Board) -> Board:
-            copied_board = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
-            for row in range(NUM_NODES):
-                for col in range(NUM_NODES):
-                    copied_board[row][col] = original[row][col]
-            return copied_board
+
 
         # implement using a dfs, variables to track maximal set
         maximal_sets = []
@@ -220,7 +226,7 @@ class Player2:
             # create a temporary board with the first move set
             move = copied_move_set[0]
             p1, p2 = move
-            move_board = copy_board(board)
+            move_board = local_copy_board(board)
             move_board[p1][p2] = player
             move_board[p2][p1] = player
 
@@ -238,8 +244,8 @@ class Player2:
 
                 # check if our current stack matches or exceeds length of maximal set
                 # add or change list of maximal sets accordingly
-                if len(allowed_move_stack) == largest_set_length:
-                    maximal_sets.append(allowed_move_stack)
+                if len(allowed_move_stack) == largest_set_length > 0:
+                    maximal_sets.append(allowed_move_stack.copy())
                 if len(allowed_move_stack) > largest_set_length:
                     maximal_sets = [allowed_move_stack.copy()]
                     largest_set_length = len(allowed_move_stack)

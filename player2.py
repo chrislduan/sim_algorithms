@@ -209,70 +209,71 @@ class Player2:
                         return True
             return False
 
+        # helper function to do a breadth first search of moves
+        # searching through lists of length N to 0 for allowed sets
+        # such as if given 4 moves, check if all 4 is an allowed set, and stop if so
+        ## If not, go to next length, 3, check if any combinations of 3 moves is an allowed set, and stop if so
+        ## otherwise proceed down the list
+        def move_bfs(move_set, board: Board):
 
-
-        # implement using a dfs, variables to track maximal set
-        maximal_sets = []
-        largest_set_length = 0
-        allowed_move_stack = []
-
-        # helper function to do a depth first search of moves
-        def move_dfs(move_set, board: Board):
-            nonlocal maximal_sets, largest_set_length, allowed_move_stack
-
-            # copy the given move set
+            # copy the given move set and board
             copied_move_set = move_set.copy()
-
-            # create a temporary board with the first move set
-            move = copied_move_set[0]
-            p1, p2 = move
             move_board = local_copy_board(board)
-            move_board[p1][p2] = player
-            move_board[p2][p1] = player
 
-            # check if the temporary board with move forms a triangle
-            forms_triangle = has_triangle(player, move_board)
+            # current length lists
+            # using set of tuples to prevent duplicate move combinations
+            current_length_set = {tuple(copied_move_set)}
 
-            # if a triangle is formed with current move, step out
-            if forms_triangle:
-                return
+            # loop through current length
+            while current_length_set:
+                length_allowed_moves = []
+                next_length_set = set()
 
-            #  continue if move is allowed
-            if not forms_triangle:
-                # if the move doesn't create triangle with allowed moves so far, add it to our set
-                allowed_move_stack.append(move)
+                for possible_set in current_length_set:
+                    # turn set into list
+                    possible_set_list = list(possible_set)
 
-                # check if our current stack matches or exceeds length of maximal set
-                # add or change list of maximal sets accordingly
-                if len(allowed_move_stack) == largest_set_length > 0:
-                    maximal_sets.append(allowed_move_stack.copy())
-                if len(allowed_move_stack) > largest_set_length:
-                    maximal_sets = [allowed_move_stack.copy()]
-                    largest_set_length = len(allowed_move_stack)
+                    # create a copy of board for checking
+                    check_board = local_copy_board(move_board)
+                    valid_list = True
+                    # check if every move in set is allowed
+                    for move in possible_set_list:
+                        point_1, point_2 = move
+                        check_board[point_1][point_2] = player
+                        check_board[point_2][point_1] = player
+                        forms_triangle = has_triangle(player, check_board)
+                        if forms_triangle:
+                            valid_list = False
 
-                # remove current move and progress deeper in combination
-                copied_move_set.pop(0)
-                while len(copied_move_set) > 0:
-                    move_dfs(copied_move_set, move_board)
-                    copied_move_set.pop(0)
+                    # checks if any no triangle has formed
+                    if valid_list:
+                        length_allowed_moves.append(possible_set_list)
 
-                # pop stack as we try different allowed move combinations
-                if len(allowed_move_stack) > 0:
-                    allowed_move_stack.pop()
+                    # if no matches were found with current length, move to next length
+                    if not length_allowed_moves:
+                        for i in range(len(possible_set_list)):
+                            # create the next possible combinations out of each object in list
+                            next_combo = tuple(possible_set_list[:i] + possible_set_list[i+1:])
+                            next_length_set.add(next_combo)
 
-        # loop through allowed moves, treating it as a queue to get every possible combination
-        while len(allowed_moves) > 0:
-            # first call on a recursive depth first search
-            move_dfs(allowed_moves, board)
-            # stack to track sets of allowed moves,reset whenever we go to next part of queue
-            allowed_move_stack = []
-            allowed_moves.pop(0)
+                # stop if set list is not empty
+                if length_allowed_moves:
+                    return length_allowed_moves
 
-        # convert maximal_sets into a list of frozen sets
+                # move to next possible length
+                current_length_set = next_length_set
+
+            # final case return empty list
+            return []
+
         result_sets = []
+        maximal_sets = move_bfs(allowed_moves, copy_of_board)
         for moveset in maximal_sets:
             result_sets.append(frozenset(moveset))
-        return set(result_sets)
+        result_sets = frozenset(maximal_sets)
+        return result_sets
+
+
 
     @staticmethod
     def get_allowed_moves(player: Color, board: Board) -> list[Edge]:

@@ -32,40 +32,15 @@ class GameBoard:
         """
         Given a Player color, search for the list for triangles
         """
-        # set of nodes
-        node_set = set()
-        # set of edges
-        edge_set = set()
-        for row in range(len(self.board)):
-            for col in range(len(self.board[row])):
-                edge = self.board[row][col]
-                # add edge to player's set of nodes if it matches player
-                if edge == player_color:
-                    node_set.add(row)
-                    node_set.add(col)
-                    edge_set.add((row, col))
 
-        # if number of nodes, there cannot be any triangles
-        if len(node_set) < 3:
-            return False
-
-        # get triangle combinations to check, list of 3-edge lists
-        # using our list of nodes
+        # get triangle combinations to check by looping over every 3 points
         triangle_combos = []
-        node_list = list(node_set)
-        for i in range(0 , len(node_list) - 2):
-            for j in range(i + 1, len(node_list) - 1):
-                for k in range(j + 1, len(node_list)):
-                    edge_1 = (node_list[i], node_list[j])
-                    edge_2 = (node_list[j], node_list[k])
-                    edge_3 = (node_list[k], node_list[i])
-
-                    triangle_combos.append([edge_1, edge_2, edge_3])
-
-        # check if triangle combination exists in our edge set
-        for combo in triangle_combos:
-            if combo[0] in edge_set and combo[1] in edge_set and combo[2] in edge_set:
-                return True
+        for i in range(0 , NUM_NODES - 2):
+            for j in range(i + 1, NUM_NODES - 1):
+                for k in range(j + 1, NUM_NODES):
+                    forms_triangle = self.board[i][j] == player_color and self.board[i][k] == player_color and self.board[j][k] == player_color
+                    if forms_triangle:
+                        return True
 
         # if no triangle return none
         return False

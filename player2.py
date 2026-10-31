@@ -247,7 +247,7 @@ class Player2:
 
                     # checks if any no triangle has formed
                     if valid_list:
-                        length_allowed_moves.append(possible_set_list)
+                        length_allowed_moves.append(frozenset(possible_set_list))
 
                     # if no matches were found with current length, move to next length
                     if not length_allowed_moves:
@@ -266,12 +266,12 @@ class Player2:
             # final case return empty list
             return []
 
-        result_sets = []
+        # result_sets = []
         maximal_sets = move_bfs(allowed_moves, copy_of_board)
-        for moveset in maximal_sets:
-            result_sets.append(frozenset(moveset))
-        result_sets = frozenset(maximal_sets)
-        return result_sets
+        # for moveset in maximal_sets:
+        #     result_sets.append(frozenset(moveset))
+        # result_sets = frozenset(maximal_sets)
+        return set(maximal_sets)
 
 
 

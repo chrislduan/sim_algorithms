@@ -69,10 +69,12 @@ def test_maximal_allowed_sets_case_1() -> None:
     miniboard.board[1] = [Color.UNCOLORED, Color.NONE, Color.NONE, Color.NONE, Color.NONE, Color.UNCOLORED]
     miniboard.board[5] = [Color.UNCOLORED, Color.UNCOLORED, Color.NONE, Color.NONE, Color.NONE, Color.NONE]
 
-    expected_set = frozenset([(0, 1), (1, 5)])
-
+    # expected_set = frozenset([(0, 1), (1, 5)])
+    expected_sets = {frozenset([(0,1)]), frozenset([(1, 5)])}
     # Act
     actual_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard.board)
+
+    assert moveset_equal(expected_sets.pop(), actual_sets.pop())
 
 
 
@@ -107,4 +109,4 @@ def test_get_move_case_2() -> None:
 
     move_1 = Player2.get_move(board_1.board)
 
-    print(1)
+    print(move_1)

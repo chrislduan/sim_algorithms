@@ -245,12 +245,13 @@ class Player2:
                         if forms_triangle:
                             valid_move_set = False
 
-                    # checks if any no triangle has formed, and adds as frozen set to our list
+                    # checks if any no triangle has formed, and adds to list
                     if valid_move_set:
                         current_length_allowed_moves.append(possible_set_list)
 
                 # stop if set list is not empty, and return the move set of all maximal moves
                 if current_length_allowed_moves:
+                    # refactor to list of frozen set on return
                     frozen_move_list = []
                     for move_set in current_length_allowed_moves:
                         frozen_move_list.append(frozenset(move_set))

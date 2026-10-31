@@ -226,8 +226,8 @@ class Player2:
 
             # loop through current length
             while current_length_set:
-                length_allowed_moves = []
-                next_length_set = set()
+                # create a list to track allowed move sets of the current length
+                current_length_allowed_moves = []
 
                 for possible_set in current_length_set:
                     # turn set into list
@@ -235,7 +235,7 @@ class Player2:
 
                     # create a copy of board for checking
                     check_board = local_copy_board(move_board)
-                    valid_list = True
+                    valid_move_set = True
                     # check if every move in set is allowed
                     for move in possible_set_list:
                         point_1, point_2 = move
@@ -243,34 +243,36 @@ class Player2:
                         check_board[point_2][point_1] = player
                         forms_triangle = has_triangle(player, check_board)
                         if forms_triangle:
-                            valid_list = False
+                            valid_move_set = False
 
-                    # checks if any no triangle has formed
-                    if valid_list:
-                        length_allowed_moves.append(frozenset(possible_set_list))
+                    # checks if any no triangle has formed, and adds as frozen set to our list
+                    if valid_move_set:
+                        current_length_allowed_moves.append(possible_set_list)
 
-                    # if no matches were found with current length, move to next length
-                    if not length_allowed_moves:
-                        for i in range(len(possible_set_list)):
-                            # create the next possible combinations out of each object in list
-                            next_combo = tuple(possible_set_list[:i] + possible_set_list[i+1:])
-                            next_length_set.add(next_combo)
-
-                # stop if set list is not empty
-                if length_allowed_moves:
-                    return length_allowed_moves
+                # stop if set list is not empty, and return the move set of all maximal moves
+                if current_length_allowed_moves:
+                    frozen_move_list = []
+                    for move_set in current_length_allowed_moves:
+                        frozen_move_list.append(frozenset(move_set))
+                    return frozen_move_list
 
                 # move to next possible length
+                next_length_set = set()
+                # create new set of combinations of next highest length to check
+                for possible_set in current_length_set:
+                    for i in range(len(possible_set)):
+                        # create the next possible combinations out of each object in list
+                        next_combo = tuple(possible_set[:i] + possible_set[i + 1:])
+                        next_length_set.add(next_combo)
                 current_length_set = next_length_set
 
             # final case return empty list
             return []
 
-        # result_sets = []
+        # get list of frozen set of edges using breadth first search
         maximal_sets = move_bfs(allowed_moves, copy_of_board)
-        # for moveset in maximal_sets:
-        #     result_sets.append(frozenset(moveset))
-        # result_sets = frozenset(maximal_sets)
+
+        # return maximal_sets as a set of frozen sets
         return set(maximal_sets)
 
 

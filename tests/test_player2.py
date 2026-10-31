@@ -52,3 +52,14 @@ def test_get_move_starter() -> None:
     actual_move = Player2.get_move(board.board)
 
     assert actual_move in possible_moves
+
+
+def test_get_move_case_1() -> None:
+    red = [(0, 1), (1, 2), (1, 3), (1,4), (1,5)]
+    blue = [(0, 4), (2, 5), (3, 4), (4,5)]
+
+    board = create_board(red, blue)
+
+    actual_move = Player2.get_move(board.board)
+
+    assert actual_move in [(0,2), (2,0), (2,3), (3,2)]

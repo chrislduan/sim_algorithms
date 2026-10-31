@@ -41,27 +41,49 @@ class Player2:
                 return first_move
 
         # check if move is in p2 maximal allowed sets to simplify nested looping
-        def move_in_p2_maximal_allowed_sets(move, p2_maximal) -> bool:
-            for move_set in p2_maximal:
-                for p2_move in move_set:
-                    if move == p2_move:
-                        return True
-            return False
+        # def move_in_p2_maximal_allowed_sets(move, p2_maximal) -> bool:
+        #     for move_set in p2_maximal:
+        #         for p2_move in move_set:
+        #             if move == p2_move:
+        #                 return True
+        #     return False
+
+        # find moves that appear in most p2 maximal sets
+        p2_maximal_move_counts = dict()
+        maximum_appearances = 0
+        for move in allowed_moves:
+            # counter for how many sets a move appears in a p2 maximal sets
+            move_appearances = 0
+            for move_set in p2_maximal_allowed_sets:
+                if move in move_set:
+                    move_appearances += 1
+            # add to p2_maximal_move_counts dictionary
+            p2_maximal_move_counts[move] = move_appearances
+            if move_appearances > maximum_appearances:
+                maximum_appearances = move_appearances
+
+        # parse through dictionary of move counts and get list of moves that appear in most (best moves)
+        p2_best_moves = []
+        for move_key, appearances in p2_maximal_move_counts:
+            if appearances == maximum_appearances:
+                p2_best_moves.append(move_key)
 
         # get maximal allowed set for p1
         p1_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard)
         p1_allowed_moves = Player2.get_allowed_moves(Color.P1, miniboard)
 
-        # case when p1_maximal allowed sets is none
-        # if len(p1_allowed_moves) == 0:
-        #     return next(iter(p2_maximal_allowed_sets[0]))
+        # when p1 has no choices, choose first move from p2 allowed
+        if len(p1_allowed_moves) == 0:
+            return allowed_moves[0]
 
 
         # find move that appears in most maximal_allowed_set
         most_p1_move = p1_allowed_moves[0]
         p1_move_count = 0
         for move in p1_allowed_moves:
-            if move_in_p2_maximal_allowed_sets(move, p2_maximal_allowed_sets):
+            # if move_in_p2_maximal_allowed_sets(move, p2_maximal_allowed_sets):
+            # check if p1 move is in the move(s) contained in the greatest number of maximal P2-allowed sets
+            if move in p2_best_moves:
                 move_count = 0
                 for move_set in p1_maximal_allowed_sets:
                     if move in move_set:

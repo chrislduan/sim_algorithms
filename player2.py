@@ -27,7 +27,7 @@ class Player2:
                     copied_board[row][col] = original[row][col]
             return copied_board
 
-        copy_of_board = copy_board(board)
+        copy_of_board = [row[:] for row in board]
 
 
         # get miniboard
@@ -35,7 +35,7 @@ class Player2:
 
         # case if miniboard is none, use the whole board
         if not miniboard:
-            miniboard = copy_of_board.copy()
+            miniboard = [row[:] for row in copy_of_board]
 
         # get allowed moves
         allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
@@ -102,7 +102,7 @@ class Player2:
         """
         Return a miniboard from the input board state. If there are multiple miniboards, this method can return any of them.
         """
-        colored_board = board.copy()
+        colored_board = [row[:] for row in board]
 
         # list of colored nodes
         colored_nodes = []
@@ -172,18 +172,8 @@ class Player2:
         If player is Color.P1, find all maximal p1-allowed sets; if player is Color.P2, find all maximal p2-allowed sets.
         """
 
-        # helper function to create copy of a given board to start mini board
-        def local_copy_board(original: Board) -> Board:
-            copied_board = [[Color.UNCOLORED for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
-            for row in range(NUM_NODES):
-                for col in range(NUM_NODES):
-                    copied_board[row][col] = original[row][col]
-            return copied_board
-
-        copy_of_board = local_copy_board(board)
-
         # first get allowed moves on a board
-        allowed_moves = Player2.get_allowed_moves(player, copy_of_board)
+        allowed_moves = Player2.get_allowed_moves(player, board)
 
         # helper function to check if a miniboard has triangle
         def has_triangle(player: Color, miniboard: Board):
@@ -208,7 +198,7 @@ class Player2:
             # get all possible combinations of current size
             for move_combo in itertools.combinations(allowed_moves, size):
                 # create a copy of board for checking
-                check_board = local_copy_board(copy_of_board)
+                check_board = [row[:] for row in board]
                 valid_move_set = True
 
                 # check if every move in move_combination is allowed

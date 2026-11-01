@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import itertools
+
 from consts import Board, Color, Edge, NUM_NODES
 
 
@@ -185,28 +187,14 @@ class Player2:
 
         # helper function to check if a miniboard has triangle
         def has_triangle(player: Color, miniboard: Board):
-            # make list of player edges
-            player_edges = []
-            for row in range(NUM_NODES):
-                for col in range(row, NUM_NODES):
-                    if miniboard[row][col] == player:
-                        player_edges.append((row, col))
-
-            # grab each edge
-            for edge in player_edges:
-                p1, p2 = edge
-                # check each point not connected to the edge and simulate the triangle it makes
-                for p3 in range(NUM_NODES):
-                    if p3 == p1 or p3 == p2:
-                        continue
-
-                    # get ordered pair edges that could possibly make a triangle
-                    edge_1 = (min(p1, p3), max(p1, p3))
-                    edge_2 = (min(p2, p3), max(p2, p3))
-
-                    # check if all edges of simulated triangle belong to player
-                    if edge_1 in player_edges and edge_2 in player_edges:
-                        return True
+            # loop through every set of 3 nodes
+            for i in range(0, NUM_NODES - 2):
+                for j in range(i + 1, NUM_NODES - 1):
+                    for k in range(j + 1, NUM_NODES):
+                        forms_triangle = (miniboard[i][j] == player and miniboard[i][k] == player and
+                                         miniboard[j][k] == player)
+                        if forms_triangle:
+                            return True
             return False
 
         # helper function to do a breadth first search of moves

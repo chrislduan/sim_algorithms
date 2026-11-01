@@ -34,8 +34,8 @@ class Player2:
         miniboard = Player2.get_miniboard(copy_of_board)
 
         # case if miniboard is none, use the whole board
-        if not miniboard:
-            miniboard = copy_of_board.copy()
+        if miniboard is None:
+            miniboard = copy_board(copy_of_board)
 
         # get allowed moves
         allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
@@ -83,17 +83,16 @@ class Player2:
 
         # find move that appears in most maximal_allowed_set
         most_p1_move = p1_allowed_moves[0]
-        p1_move_count = 0
-        for move in p1_allowed_moves:
-            # check if p1 move is in the move(s) contained in the greatest number of maximal P2-allowed sets
-            if move in p2_best_moves:
-                move_count = 0
-                for move_set in p1_maximal_allowed_sets:
-                    if move in move_set:
-                        move_count += 1
-                if move_count > p1_move_count:
-                    p1_move_count = move_count
-                    most_p1_move = move
+        p1_move_count = -1
+        # using p2 moves used most in maximal p2 sets and find the move in the most p1 maximal allowed sets
+        for move in p2_best_moves:
+            move_count = 0
+            for move_set in p1_maximal_allowed_sets:
+                if move in move_set:
+                    move_count += 1
+            if move_count > p1_move_count:
+                p1_move_count = move_count
+                most_p1_move = move
 
         return most_p1_move
 

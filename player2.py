@@ -170,7 +170,7 @@ class Player2:
 
                     # remove the current node and make new set of remaining nodes
                     remaining_nodes = []
-                    for node in possible_nodes:
+                    for node in nodes:
                         if node != removed_node:
                             remaining_nodes.append(node)
 

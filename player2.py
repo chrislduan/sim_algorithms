@@ -239,7 +239,7 @@ class Player2:
                 check_board = [row[:] for row in board]
                 valid_move_set = True
 
-                # check if every move in move_combination is allowed
+                # check if every move in move_combination is allowed together
                 for point_1, point_2 in move_combo:
                     check_board[point_1][point_2] = player
                     check_board[point_2][point_1] = player
@@ -247,7 +247,7 @@ class Player2:
                     if forms_triangle:
                         valid_move_set = False
 
-                # checks if any no triangle has formed, and adds to list as frozen set
+                # checks if no triangle has formed, and adds to list as frozen set
                 if valid_move_set:
                     maximal_sets.add(frozenset(move_combo))
 

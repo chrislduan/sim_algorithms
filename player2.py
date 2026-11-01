@@ -266,17 +266,17 @@ class Player2:
         """
         Return a list of all distinct valid moves for the given player over the input board state.
         """
-        # get list of uncolored edges and player edges
-        player_edges = []
+        # get list of uncolored edges and set of player edges
+        player_edges = set()
         uncolored_edges = []
         for row in range(len(board)):
             # doing range of col greater than row, that way we only look at ordered edges
             # i.e. only listing (0,1) and (1,2) instead of the former and (1, 0) and (2, 10)
-            for col in range(row, len(board[row])):
+            for col in range(row + 1, len(board[row])):
                 if board[row][col] == Color.UNCOLORED:
                     uncolored_edges.append((row, col))
                 elif board[row][col] == player:
-                    player_edges.append((row, col))
+                    player_edges.add((row, col))
 
         # create list of allowed moves by going through every uncolored edge
         allowed_moves = []

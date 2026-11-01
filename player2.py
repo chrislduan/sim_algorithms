@@ -47,7 +47,6 @@ class Player2:
         # get maximal allowed set for p2
         p2_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P2, miniboard)
 
-
         # find moves that appear in most p2 maximal sets
         p2_maximal_move_counts = dict()
         maximum_appearances = 0
@@ -76,15 +75,16 @@ class Player2:
         p1_maximal_allowed_sets = Player2.get_maximal_allowed_sets(Color.P1, miniboard)
         p1_allowed_moves = Player2.get_allowed_moves(Color.P1, miniboard)
 
-        # when p1 has no choices, choose first move from p2 allowed
+        # when p1 has no choices, choose first move from the best p2 moves
         if len(p1_allowed_moves) == 0:
-            return allowed_moves[0]
+            return p2_best_moves[0]
 
 
         # find move that appears in most maximal_allowed_set
-        most_p1_move = p1_allowed_moves[0]
+        most_p1_move = p2_best_moves[0]
         p1_move_count = -1
         # using p2 moves used most in maximal p2 sets and find the move in the most p1 maximal allowed sets
+        # returning the first one that is found if there are multiple that appear the maximum amount
         for move in p2_best_moves:
             move_count = 0
             for move_set in p1_maximal_allowed_sets:
@@ -129,12 +129,12 @@ class Player2:
                 # add all colored nodes
                 for node in colored_nodes:
                     nodes.append(node)
-                # add all of the possible nodes that are not already in the list
+                # add possible combination of additional nodes we have to our miniboard to test
                 for node in added_nodes:
                     if node not in nodes:
                         nodes.append(node)
 
-                # sort for sake of ease
+                # sort for sake of ease in making miniboard
                 nodes.sort()
 
                 # create a miniboard
@@ -184,8 +184,8 @@ class Player2:
                         for j in range(i + 1, len(remaining_nodes)):
                             point_1 = remaining_nodes[i]
                             point_2 = remaining_nodes[j]
-                            miniboard[point_1][point_2] = board[point_1][point_2]
-                            miniboard[point_2][point_1] = board[point_2][point_1]
+                            temp_miniboard[point_1][point_2] = board[point_1][point_2]
+                            temp_miniboard[point_2][point_1] = board[point_2][point_1]
 
                     # check if this temp miniboard with removed node has P2 allowed moves
                     temp_allowed_moves = Player2.get_allowed_moves(Color.P2, temp_miniboard)

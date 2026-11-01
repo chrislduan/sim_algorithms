@@ -27,7 +27,7 @@ class Player2:
                     copied_board[row][col] = original[row][col]
             return copied_board
 
-        copy_of_board = [row[:] for row in board]
+        copy_of_board = copy_board(board)
 
 
         # get miniboard
@@ -35,7 +35,7 @@ class Player2:
 
         # case if miniboard is none, use the whole board
         if not miniboard:
-            miniboard = [row[:] for row in copy_of_board]
+            miniboard = copy_of_board.copy()
 
         # get allowed moves
         allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
@@ -102,63 +102,102 @@ class Player2:
         """
         Return a miniboard from the input board state. If there are multiple miniboards, this method can return any of them.
         """
-        colored_board = [row[:] for row in board]
-
         # list of colored nodes
         colored_nodes = []
 
         # remove all non-colored edges on the board and get list of colored nodes
         for i in range(len(board)):
             for j in range(len(board[i])):
-                if board[i][j] == Color.UNCOLORED:
-                    colored_board[i][j] = Color.NONE
                 if board[i][j] == Color.P1 or board[i][j] == Color.P2:
                     if i not in colored_nodes:
                         colored_nodes.append(i)
                     if j not in colored_nodes:
                         colored_nodes.append(j)
 
-        # get list of possible nodes to add to the board (dictionary of lists, keyed on nodes)
-        # by finding the nodes without any colored edges
-        node_uncolored_edge_count = {
-            0: [],
-            1: [],
-            2: [],
-            3: [],
-            4: [],
-            5: []
-        }
-        for i in range(NUM_NODES):
-            for j in range(NUM_NODES):
-                # check through edges marked none that are not diagonals
-                if board[i][j] == Color.NONE and i != j:
-                    # correct board such that any node with colored edges will have uncolored edges as well
-                    if i in colored_nodes and j in colored_nodes:
-                        colored_board[i][j] = Color.UNCOLORED
-                    # add to non_colored_edge count if the node is not part of the colored set
-                    if i not in colored_nodes:
-                        node_uncolored_edge_count[i].append(j)
+        # get list of possible nodes to add to board
+        possible_nodes = []
+        for node in range(NUM_NODES):
+            if node not in colored_nodes:
+                possible_nodes.append(node)
 
-        # go through every node
-        for node in node_uncolored_edge_count:
-            # if all edges are colored, skip
-            if len(node_uncolored_edge_count[node]) == 0:
-                continue
-            # create a miniboard including all colored edges and uncolored edges linking to current node
-            miniboard = colored_board
-            # mark all edges connected to node as uncolored
-            for i in range(NUM_NODES):
-                # set all edges related to node and a colored node as uncolored except for diagonal
-                if i in colored_nodes and miniboard[node][i] == Color.NONE and node != i:
-                    # color node in both directions
-                    miniboard[node][i] = Color.UNCOLORED
-                    miniboard[i][node] = Color.UNCOLORED
+        # go through every possible combination of remaining nodes to see if it creates a valid miniboard
+        # check if we can add 0, 1, 2, ... N nodes to the board
+        for num_added_nodes in range(len(possible_nodes) + 1):
+            # loop through every possible combination of added nodes
+            for added_nodes in itertools.combinations(possible_nodes, num_added_nodes):
+                # create list of nodes
+                nodes = []
+                # add all colored nodes
+                for node in colored_nodes:
+                    nodes.append(node)
+                # add all of the possible nodes that are not already in the list
+                for node in added_nodes:
+                    if node not in nodes:
+                        nodes.append(node)
 
-            # check if there is at least one allowed move for P2 on this board
-            allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
+                # sort for sake of ease
+                nodes.sort()
 
-            if len(allowed_moves) > 1:
-                return miniboard
+                # create a miniboard
+                miniboard = [[Color.NONE for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
+
+                # mark diagonal as none
+                for i in range(NUM_NODES):
+                    miniboard[i][i] = Color.NONE
+
+                # copy the edges from our board that we have nodes for
+                for i in range(len(nodes)):
+                    for j in range(i + 1, len(nodes)):
+                        point_1 = nodes[i]
+                        point_2 = nodes[j]
+                        miniboard[point_1][point_2] = board[point_1][point_2]
+                        miniboard[point_2][point_1] = board[point_2][point_1]
+
+                # get list of allowed moves on our current miniboard
+                allowed_moves = Player2.get_allowed_moves(Color.P2, miniboard)
+
+                # check if allowed moves is empty, if so, try next possible miniboard
+                if len(allowed_moves) == 0:
+                    continue
+
+                # track if smallest board
+                is_smallest_board = True
+
+                # loop through every node to see if we can remove it and get a valid miniboard
+                for removed_node in nodes:
+                    # skip colored nodes as we cannot remove them
+                    if removed_node in colored_nodes:
+                        continue
+
+                    # remove the current node and make new set of remaining nodes
+                    remaining_nodes = []
+                    for node in possible_nodes:
+                        if node != removed_node:
+                            remaining_nodes.append(node)
+
+                    # create new temporary miniboard that has lost the removed node
+                    temp_miniboard = [[Color.NONE for _ in range(NUM_NODES)] for _ in range(NUM_NODES)]
+                    for i in range(NUM_NODES):
+                        temp_miniboard[i][i] = Color.NONE
+
+                    # copy the edges from our board that we have nodes for
+                    for i in range(len(remaining_nodes)):
+                        for j in range(i + 1, len(remaining_nodes)):
+                            point_1 = remaining_nodes[i]
+                            point_2 = remaining_nodes[j]
+                            miniboard[point_1][point_2] = board[point_1][point_2]
+                            miniboard[point_2][point_1] = board[point_2][point_1]
+
+                    # check if this temp miniboard with removed node has P2 allowed moves
+                    temp_allowed_moves = Player2.get_allowed_moves(Color.P2, temp_miniboard)
+                    # if new temp board has allowed moves, we are not at smallest board, so continue to next
+                    if len(temp_allowed_moves) > 0:
+                        is_smallest_board = False
+                        break
+
+                # after checking all possible removed nodes, if still smallest board, return it
+                if is_smallest_board:
+                    return miniboard
 
         return None
 

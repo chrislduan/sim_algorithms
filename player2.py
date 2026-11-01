@@ -197,72 +197,39 @@ class Player2:
                             return True
             return False
 
-        # helper function to do a breadth first search of moves
-        # searching through lists of length N to 0 for allowed sets
+        # searching through lists of length N to 0 for allowed sets, largest to smallest
         # such as if given 4 moves, check if all 4 is an allowed set, and stop if so
         ## If not, go to next length, 3, check if any combinations of 3 moves is an allowed set, and stop if so
         ## otherwise proceed down the list
-        def move_bfs(move_set, board: Board):
+        # iterate through size N to 0
+        for size in range(len(allowed_moves), 0, -1):
+            maximal_sets = set()
 
-            # copy the given move set and board
-            copied_move_set = move_set.copy()
-            move_board = local_copy_board(board)
+            # get all possible combinations of current size
+            for move_combo in itertools.combinations(allowed_moves, size):
+                # create a copy of board for checking
+                check_board = local_copy_board(copy_of_board)
+                valid_move_set = True
 
-            # current length lists
-            # using set of tuples to prevent duplicate move combinations
-            current_length_set = {tuple(copied_move_set)}
+                # check if every move in move_combination is allowed
+                for point_1, point_2 in move_combo:
+                    check_board[point_1][point_2] = player
+                    check_board[point_2][point_1] = player
+                    forms_triangle = has_triangle(player, check_board)
+                    if forms_triangle:
+                        valid_move_set = False
 
-            # loop through current length
-            while current_length_set:
-                # create a list to track allowed move sets of the current length
-                current_length_allowed_moves = []
+                # checks if any no triangle has formed, and adds to list as frozen set
+                if valid_move_set:
+                    maximal_sets.add(frozenset(move_combo))
 
-                for possible_set in current_length_set:
-                    # turn set into list
-                    possible_set_list = list(possible_set)
+            # stop if set list is not empty, and return the move set of all maximal moves
+            if maximal_sets:
+                return maximal_sets
 
-                    # create a copy of board for checking
-                    check_board = local_copy_board(move_board)
-                    valid_move_set = True
-                    # check if every move in set is allowed
-                    for move in possible_set_list:
-                        point_1, point_2 = move
-                        check_board[point_1][point_2] = player
-                        check_board[point_2][point_1] = player
-                        forms_triangle = has_triangle(player, check_board)
-                        if forms_triangle:
-                            valid_move_set = False
+        # return empty set if no moves found
+        return set()
 
-                    # checks if any no triangle has formed, and adds to list
-                    if valid_move_set:
-                        current_length_allowed_moves.append(possible_set_list)
-
-                # stop if set list is not empty, and return the move set of all maximal moves
-                if current_length_allowed_moves:
-                    # refactor to list of frozen set on return
-                    frozen_move_list = []
-                    for move_set in current_length_allowed_moves:
-                        frozen_move_list.append(frozenset(move_set))
-                    return frozen_move_list
-
-                # move to next possible length
-                next_length_set = set()
-                # create new set of combinations of next highest length to check
-                for possible_set in current_length_set:
-                    for i in range(len(possible_set)):
-                        # create the next possible combinations out of each object in list
-                        next_combo = tuple(possible_set[:i] + possible_set[i + 1:])
-                        next_length_set.add(next_combo)
-                current_length_set = next_length_set
-
-            # final case return empty list
-            return []
-
-        # get list of frozen set of edges using breadth first search
-        maximal_sets = move_bfs(allowed_moves, copy_of_board)
-
-        # return maximal_sets as a set of frozen sets
-        return set(maximal_sets)
 
 
 
